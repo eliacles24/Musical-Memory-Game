@@ -1,0 +1,65 @@
+Name     GAL2_PAU ;
+PartNo   00 ;
+Date     05/11/2024 ;
+Revision 01 ;
+Designer Engineer ;
+Company  LaSalle ;
+Assembly None ;
+Location  ;
+Device   g22v10 ;
+
+/* *************** INPUT PINS *********************/
+PIN  1  =  Counter9; /*                                 */ 
+PIN  2  =  Counter10; /*                                 */ 
+PIN  3  =  A0; /*                                 */ 
+PIN  4  =  PCI; /*                                 */ 
+PIN  6  =  A1; /*                                 */ 
+PIN  7  =  A2; /*                                 */ 
+PIN  9  =  nKP; /*                                 */ 
+PIN  10  =  15notes; /*                                 */ 
+PIN  11  =  1nota; /*                                 */ 
+
+
+
+/* *************** OUTPUT PINS *********************/
+PIN  14 =  ENCount; /*                                 */ 
+PIN  15 =  Led1; /*                                 */ 
+PIN  16 =  Led2; /*                                 */ 
+PIN  17 =  nPCI; /*                                 */ 
+PIN  18 =  Sec0; /*                                 */ 
+PIN  19 =  Sec1; /*                                 */ 
+PIN  20 =  LedON; /*                                 */ 
+PIN  21=  16notes; /*                                 */ 
+PIN  22 =  KP; /*                                 */ 
+PIN  23 =  ENCounter; /*                                 */ 
+
+
+
+16notes = (!1nota) & 15notes;
+
+/* Decode (only some) states) */
+
+S4 = (!A2) & (!A1) & A0;
+S5 = (!A2) & A1 & A0;
+S6 = A2 & A1 & (!A0);
+S7 = A2 & (!A1) & (!A0);
+
+/* Set variables */
+
+temp1 = S4 # S5 # S6 # S7;	/*Used for LEDs*/
+
+ENCount = !(Counter10) & KP;
+
+Led1 = Sec0 & temp1;
+Led2 = Sec1 & temp1;
+LedON = temp1;
+
+KP = (!nKP);
+
+Sec0 = !(Counter9);
+Sec1 = Counter9 # Counter10;
+
+ENCounter = !S7;
+
+nPCI = !(PCI);
+

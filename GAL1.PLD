@@ -1,0 +1,91 @@
+Name     GAL1_Pau ;
+PartNo   00 ;
+Date     05/11/2024 ;
+Revision 01 ;
+Designer Engineer ;
+Company  LaSalle ;
+Assembly None ;
+Location 	;
+Device   g22v10 ;
+
+/* *************** INPUT PINS *********************/
+PIN  1  = CLK; /*                                 */ 
+PIN  2  = A0; /*                                 */ 
+PIN  3  = A1; /*                                 */ 
+PIN  4  = A2; /*                                 */ 
+PIN  5  = ACK; /*                                 */ 
+PIN  6  = 16ms; /*                                 */ 
+PIN  7  = PCI; /*                                 */ 
+PIN  8  = WK3; /*                                 */ 
+PIN  9  = 16notes; /*                                 */ 
+PIN  10 = Column0; /*                                 */ 
+PIN  11 = Column1; /*                                 */ 
+PIN  13 = Column2; /*                                 */ 
+
+
+/* *************** OUTPUT PINS *********************/
+PIN  14 = Q0; /*                                 */ 
+PIN  15 = Q1; /*                                 */ 
+PIN  16 = Q2; /*                                 */ 
+PIN  17 = TFetch; /*                                 */ 
+PIN  18 = NCReset; /*                                 */ 
+PIN  19 = TSave; /*                                 */ 
+PIN  20 = NewNote; /*                                 */ 
+PIN  21 = StartGame; /*                                 */ 
+PIN  22 = nRDBouncer; /*                                 */ 
+PIN  23 = nKP; /*                                 */ 
+
+Finish = WK3 # 16notes;
+nKP = (Column0) & (Column1) & (Column2);
+KP = !(nKP);
+
+/* Current state decoding */
+
+S0 = (!A2) & (!A1) & (!A0);
+S1 = A2 & (!A1) & A0;
+S2 = A2 & A1 & A0;
+S3 = (!A2) & A1 & (!A0);
+S4 = (!A2) & (!A1) & A0;
+S5 = (!A2) & A1 & A0;
+S6 = A2 & A1 & (!A0);
+S7 = A2 & (!A1) & (!A0);
+
+/* Calculate next state */
+
+temp1 = S0 # S2;	/* Used in N0*/
+temp2 = (S7 & ACK) # (S2 & KP);	/*Used in N3*/
+temp3 = (S2 & !Finish) # S4 # (S5 & 16ms);	/*Used in N4*/
+
+
+
+N0 = (!KP & S0) # (!KP & S2) # (S7 & ACK & !Finish) # PCI;
+N1 = (S0 & KP) # (S1 & !16ms);
+N2 = S1 & 16ms;
+N3 = (S7 & ACK & Finish) # (S2 & KP & Finish) # S3;
+N4 = (S2 & KP & !Finish) # (S4 & KP) # (S5 & 16ms & KP);
+N5 = (S4 & !KP) # (S5 & !16ms);
+N6 = S5 & 16ms & !KP;
+N7 = S6 # (S7 & !ACK);
+
+/* Setting variables */
+
+TFetch = N0 & (!CLK);
+NCReset = !(N0 # N2);
+TSave = N2;
+NewNote = N6 & (!CLK);
+StartGame = N3;
+nRDBouncer = !(N0 # N4);
+
+
+
+/* Encode next state */
+
+Q0 = N1 # N2 # N4 # N5;
+Q1 = N2 # N3 # N5 # N6;
+Q2 = N1 # N2 # N6 # N7;
+
+
+
+
+
+
